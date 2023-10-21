@@ -1,0 +1,11 @@
+.vscode/
+.DS_Store
+
+miniRT
+obj
+
+a.out
+*.o
+*.d
+*.a
+*.dSYM
