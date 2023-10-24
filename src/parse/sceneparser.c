@@ -68,6 +68,13 @@ int	parsecamera(const char* line, t_scene* scene)
 		return r;
 	if(scene->camera.fov <= 0.0f || scene->camera.fov > 180.0f)
 		return 2;
+	if(!(r = parsedouble(&line, &scene->camera.lensradius)))
+	{
+		if((r = parsedouble(&line, &scene->camera.focaldist)))
+			return scene->camera.focaldist = 1.0f, r;
+		if(scene->camera.focaldist <= 0.0f || scene->camera.lensradius < 0.0f)
+			return 2;
+	}
 	scene->camera.ori = vec3norm(scene->camera.ori);
 	scene->camera.rot = lookvector(scene->camera.ori);
 	scene->camera.fov *= M_PI / 180.0f;

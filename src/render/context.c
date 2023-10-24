@@ -6,6 +6,12 @@
 
 #include "util/util.h"
 
+uint* randomstate()
+{
+	static uint state = 0;
+	return &state;
+}
+
 static void context_resize(int32_t width, int32_t height, void* param)
 {
 	t_context* const ctx = (t_context*)param;

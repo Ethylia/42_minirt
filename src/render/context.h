@@ -25,6 +25,7 @@ typedef struct s_context
 	time_t end;
 } t_context;
 
+uint* randomstate();
 int contextnew(t_context *ctx, int width, int height);
 void contextfree(t_context *ctx);
 

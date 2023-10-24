@@ -23,47 +23,54 @@ static vec3* imgvec(t_context* ctx, const t_region* reg,
 	return (&(ctx->secimg[reg->imgid][y * reg->width + x]));
 }
 
-vec3 pixelcast(t_context* ctx, const t_ray ray,
-	const unsigned int x, const unsigned int y)
+vec3 pixelcast(t_context* ctx, const uint x, const uint y)
 {
-	vec3 color;
-	t_hit hit;
+	float top = -tanf(ctx->scene.camera.fov / 2.0f);
+	float right = -top * ctx->aspect;
 
-	hit = raycast((t_ray){vec3norm((vec3){{{
-			ray.pos.x + ((rand() / (float)(RAND_MAX)) - 0.5f) * 0.0045f,
-			ray.pos.y + ((rand() / (float)(RAND_MAX)) - 0.5f) * 0.0045f,
-			ray.pos.z + ((rand() / (float)(RAND_MAX)) - 0.5f) * 0.0045f,
-		}}}), ray.dir}, &ctx->scene);
+	vec3 posonfocusplane =
+		vec3scale((vec3){{{
+			right * ((float)(x * 2) / (float)ctx->scene.renderwidth - 1.0f),
+			top * ((float)(y * 2) / (float)ctx->scene.renderheight - 1.0f),
+			1.0f
+		}}}, ctx->scene.camera.focaldist);
+
+	float rad = sqrtf(rand() / (float)RAND_MAX) * ctx->scene.camera.lensradius / ctx->scene.renderwidth;
+	float angle = rand() / (float)RAND_MAX * 2.0f * M_PI;
+
+	vec3 posonlens =
+		(vec3){{{
+			rad * cosf(angle),
+			rad * sinf(angle),
+			0.0f
+		}}};
+
+	vec3 dir = mat3mulvec3(ctx->scene.camera.rot,
+		vec3norm(vec3sub(posonfocusplane, posonlens)));
+
+	t_hit hit = raycast((t_ray)
+		{
+			vec3add(mat3mulvec3(ctx->scene.camera.rot, posonlens), ctx->scene.camera.pos), dir
+		}, &ctx->scene);
+
 	if(hit.obj)
-		color = shade(hit.obj, hit.pos, &ctx->scene, ray.dir);
+		return shade(hit.obj, hit.pos, &ctx->scene, dir);
 	else
-		color = (vec3){{{0.3f, 0.5f, 0.8f}}};
-	return color;
+		return (vec3){{{0.3f, 0.5f, 0.8f}}};
 }
 
 void renderregion(t_context *ctx, const t_region region)
 {
-	const float fov = tanf(ctx->scene.camera.fov / 2.0f);
-
 	for(uint isample = 0; isample < ctx->scene.samples; ++isample)
 	{
 		for(uint iy = region.y; iy < region.y + region.height; ++iy)
-		{
 			for(uint ix = region.x; ix < region.x + region.width; ++ix)
-			{
 				if(ctx->exit)
 					return ;
-				const t_ray ray = {ctx->scene.camera.pos,
-					mat3mulvec3(ctx->scene.camera.rot, (vec3){{{
-							(2.0f * ((ix + 0.5f) / ctx->width) - 1.0f) * ctx->aspect * fov,
-							-(2.0f * ((iy + 0.5f) / ctx->height) - 1.0f) * fov,
-							1.0f
-						}}})
-					};
-				blend(imgvec(ctx, &region, ix - region.x, iy - region.y),
-					pixelcast(ctx, ray, ix, iy));
-			}
-		}
+				else
+					blend(imgvec(ctx, &region, ix - region.x, iy - region.y),
+						pixelcast(ctx, ix, iy));
+
 		transferimg(ctx, &region);
 	}
 }

@@ -30,9 +30,9 @@ static char* loadfile(const char* path)
 		r = read(fd, data + size, ALLOC_SIZE);
 		if(r == ALLOC_SIZE)
 		{ // If we read the full buffer, allocate more memory and continue
+			size += ALLOC_SIZE;
 			if(!(data = memalloc(size + ALLOC_SIZE, size, data)))
 				break;
-			size += ALLOC_SIZE;
 		}
 		else // If we read less than the full buffer, we're done
 			break;
