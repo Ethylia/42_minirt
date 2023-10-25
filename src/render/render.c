@@ -28,6 +28,7 @@ vec3 pixelcast(t_context* ctx, const uint x, const uint y)
 	float top = -tanf(ctx->scene.camera.fov / 2.0f);
 	float right = -top * ctx->aspect;
 
+	// point on a plane at focal distance for the given pixel
 	vec3 posonfocusplane =
 		vec3scale((vec3){{{
 			right * ((float)(x * 2) / (float)ctx->scene.renderwidth - 1.0f),
@@ -35,9 +36,9 @@ vec3 pixelcast(t_context* ctx, const uint x, const uint y)
 			1.0f
 		}}}, ctx->scene.camera.focaldist);
 
+	// random point on a disk
 	float rad = sqrtf(rand() / (float)RAND_MAX) * ctx->scene.camera.lensradius / ctx->scene.renderwidth;
 	float angle = rand() / (float)RAND_MAX * 2.0f * M_PI;
-
 	vec3 posonlens =
 		(vec3){{{
 			rad * cosf(angle),
@@ -45,18 +46,25 @@ vec3 pixelcast(t_context* ctx, const uint x, const uint y)
 			0.0f
 		}}};
 
+	// direction from lens to focus plane with camera rotation applied
 	vec3 dir = mat3mulvec3(ctx->scene.camera.rot,
 		vec3norm(vec3sub(posonfocusplane, posonlens)));
 
-	t_hit hit = raycast((t_ray)
-		{
-			vec3add(mat3mulvec3(ctx->scene.camera.rot, posonlens), ctx->scene.camera.pos), dir
-		}, &ctx->scene);
+	// raycast from lens with camera properties applied to point on focus plane
+	t_ray ray = (t_ray){
+		vec3add(mat3mulvec3(ctx->scene.camera.rot, posonlens), ctx->scene.camera.pos), dir
+	};
+	t_hit hit = raycast(ray, &ctx->scene);
 
 	if(hit.obj)
 		return shade(hit.obj, hit.pos, &ctx->scene, dir);
 	else
-		return (vec3){{{0.3f, 0.5f, 0.8f}}};
+	{
+		// sky color gradient
+		vec3 skyboxpos = vec3norm(vec3scale(ray.dir, ctx->scene.camera.focaldist));
+		float ratio = 1.0f - (skyboxpos.y / 2.0f + 0.5f);
+		return (vec3){{{ratio * 0.3f, ratio * 0.5f, ratio * 1.0f}}};
+	}
 }
 
 void renderregion(t_context *ctx, const t_region region)

@@ -83,7 +83,7 @@ t_hit raycast(const t_ray ray, const t_scene* s)
 
 	hit.obj = NULL;
 	t[0] = __FLT_MAX__;
-	for(size_t i = 0; i < s->objc; ++i)
+	for(size_t i = 0; i < s->objcount; ++i)
 	{
 		t[1] = ray_intersect(ray, s->objs + i);
 		if(t[1] > 0.0f && t[1] < t[0])

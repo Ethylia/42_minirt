@@ -14,13 +14,17 @@ int parsesphere(const char* line, t_scene* scene)
 
 	int r = 0;
 	if((r = parsevec(&line, sphere->sphere.pos.e)) ||
-		(r = parsedouble(&line, &sphere->sphere.rad)) ||
-		(r = parsecolor(&line, sphere->sphere.color.e)) ||
-		(r = parsecolor(&line, sphere->emit.e)))
+		(r = parsedouble(&line, &sphere->sphere.rad)))
 		return r;
 
 	if(sphere->sphere.rad <= 0.0f)
 		return 2;
+
+	uint matid = 0;
+	if(!(r = parseuint(&line, &matid)))
+		if(matid >= scene->matcount)
+			return 2;
+	sphere->mat = scene->mats + matid;
 	
 	sphere->sphere.rad /= 2.0f;
 	
@@ -42,10 +46,14 @@ int parseplane(const char* line, t_scene* scene)
 
 	int r = 0;
 	if((r = parsevec(&line, plane->plane.pos.e)) ||
-		(r = parsevec(&line, plane->plane.ori.e)) ||
-		(r = parsecolor(&line, plane->plane.color.e)) ||
-		(r = parsecolor(&line, plane->emit.e)))
+		(r = parsevec(&line, plane->plane.ori.e)))
 		return 3;
+
+	uint matid = 0;
+	if(!(r = parseuint(&line, &matid)))
+		if(matid >= scene->matcount)
+			return 2;
+	plane->mat = scene->mats + matid;
 
 	line += countws(line);
 	if(*line != '\n' && *(line) != 0)
@@ -68,13 +76,17 @@ int parsecylinder(const char* line, t_scene* scene)
 	if((r = parsevec(&line, cylinder->cylinder.pos.e)) ||
 		(r = parsevec(&line, cylinder->cylinder.axis.e)) ||
 		(r = parsedouble(&line, &cylinder->cylinder.rad)) ||
-		(r = parsedouble(&line, &cylinder->cylinder.height)) ||
-		(r = parsecolor(&line, cylinder->cylinder.color.e)) ||
-		(r = parsecolor(&line, cylinder->emit.e)))
+		(r = parsedouble(&line, &cylinder->cylinder.height)))
 		return 3;
 
 	if(cylinder->cylinder.rad <= 0.0f || cylinder->cylinder.height <= 0.0f)
 		return 2;
+
+	uint matid = 0;
+	if(!(r = parseuint(&line, &matid)))
+		if(matid >= scene->matcount)
+			return 2;
+	cylinder->mat = scene->mats + matid;
 
 	line += countws(line);
 	if(*line != '\n' && *(line) != 0)

@@ -10,6 +10,7 @@
 #define ID_SPHERE "sp"
 #define ID_PLANE "pl"
 #define ID_CYLINDER "cy"
+#define ID_MATERIAL "m"
 
 int parseambient(char const* line, t_scene* scene);
 int parsesettings(char const* line, t_scene* scene);
@@ -17,6 +18,7 @@ int parsecamera(char const* line, t_scene* scene);
 int parsesphere(char const* line, t_scene* scene);
 int parseplane(char const* line, t_scene* scene);
 int parsecylinder(char const* line, t_scene* scene);
+int parsematerial(char const* line, t_scene* scene);
 
 int parsecolor(char const** str, float* v);
 int parsedouble(char const** str, float* v);

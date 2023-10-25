@@ -85,3 +85,27 @@ int	parsecamera(const char* line, t_scene* scene)
 
 	return 0;
 }
+
+int parsematerial(const char* line, t_scene* scene)
+{
+	t_material* mat = sceneaddmat(scene);
+	if(!mat)
+		return 4;
+
+	int r = 0;
+	if((r = parsedouble(&line, &mat->metallic)) ||
+		(r = parsedouble(&line, &mat->roughness)) ||
+		(r = parsecolor(&line, mat->albedo.e)) ||
+		(r = parsecolor(&line, mat->emit.e)))
+		return r;
+
+	if(mat->metallic < 0.0f || mat->metallic > 1.0f ||
+		mat->roughness < 0.0f || mat->roughness > 1.0f)
+		return 2;
+
+	line += countws(line);
+	if(*line != '\n' && *(line) != 0)
+		return 3;
+
+	return 0;
+}

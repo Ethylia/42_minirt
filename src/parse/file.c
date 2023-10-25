@@ -53,12 +53,12 @@ static int parseline(const char* line, t_scene* scene)
 	const char* const id[] =
 		{
 			ID_A_LIGHT, ID_SAMPLES, ID_CAMERA,
-			ID_SPHERE, ID_PLANE, ID_CYLINDER
+			ID_SPHERE, ID_PLANE, ID_CYLINDER, ID_MATERIAL
 		};
 	static int (* const funcs[])(const char*, t_scene*) =
 		{
 			parseambient, parsesettings, parsecamera, parsesphere,
-			parseplane, parsecylinder
+			parseplane, parsecylinder, parsematerial
 		};
 
 	line += countws(line);

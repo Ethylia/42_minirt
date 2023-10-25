@@ -13,6 +13,7 @@ SRC_FILES = main.c \
             render/thread.c \
             util/mem.c \
             util/str.c \
+			util/vector.c \
 			obj/scene.c
 
 SRC_DIR = src

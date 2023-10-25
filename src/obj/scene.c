@@ -10,12 +10,21 @@
 int scenenew(t_scene* scene)
 {
 	memset(scene, 0, sizeof(t_scene));
-	if(!(scene->objs = memalloc(sizeof(t_obj) * INIT_SIZE, 0, 0)))
+	if(!vecinit(&scene->objvec, sizeof(t_obj), INIT_SIZE))
 		return 1;
-	scene->objsize = INIT_SIZE;
-	if(!(scene->lights = memalloc(sizeof(t_light) * INIT_SIZE, 0, 0)))
+	if(!vecinit(&scene->matvec, sizeof(t_material), INIT_SIZE))
 		return 1;
-	scene->lightsize = INIT_SIZE;
+
+	t_material defaultmat =
+	{
+		.metallic = 0.0f,
+		.roughness = 1.0f,
+		.emit = (vec3){{{0.0f, 0.0f, 0.0f}}},
+		.albedo = (vec3){{{0.5f, 0.5f, 0.5f}}}
+	};
+	vecpush(&scene->matvec, &defaultmat);
+
+	scene->a_light.color = (vec3){{{0.0f, 0.0f, 0.0f}}};
 
 	scene->maxdepth = 5;
 	scene->regionsize = 32;
@@ -23,40 +32,30 @@ int scenenew(t_scene* scene)
 	scene->camera.pos = (vec3){{{0.0f, 0.0f, 0.0f}}};
 	scene->camera.ori = (vec3){{{0.0f, 0.0f, 1.0f}}};
 	scene->camera.fov = 1.5f;
-	scene->camera.lensradius = 0.0005f;
-	scene->camera.focaldist = 0.05f;
+	scene->camera.lensradius = 0.0f;
+	scene->camera.focaldist = 1.0f;
 
 	return 0;
 }
 
 void scenefree(t_scene* scene)
 {
-	free(scene->objs);
-	scene->objs = 0;
-	free(scene->lights);
-	scene->lights = 0;
-}
-
-t_light* sceneaddlight(t_scene* scene)
-{
-	if(scene->lightc >= scene->lightsize)
-	{
-		if(!(scene->lights = memalloc(sizeof(t_light) * scene->lightsize * 2,
-			sizeof(t_light) * scene->lightsize, scene->lights)))
-			return 0;
-		scene->lightsize *= 2;
-	}
-	return scene->lights + scene->lightc++;
+	vecfree(&scene->objvec);
+	vecfree(&scene->matvec);
 }
 
 t_obj* sceneaddobj(t_scene* scene)
 {
-	if(scene->objc >= scene->objsize)
-	{
-		if(!(scene->objs = memalloc(sizeof(t_obj) * scene->objsize * 2,
-			sizeof(t_obj) * scene->objsize, scene->objs)))
-			return 0;
-		scene->objsize *= 2;
-	}
-	return &(scene->objs[scene->objc++]);
+	if(vecpush(&scene->objvec, &(t_obj){0}))
+		return &(scene->objs[scene->objvec.size - 1]);
+	else
+		return 0;
+}
+
+t_material* sceneaddmat(t_scene* scene)
+{
+	if(vecpush(&scene->matvec, &(t_material){0}))
+		return &(scene->mats[scene->matvec.size - 1]);
+	else
+		return 0;
 }

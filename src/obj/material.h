@@ -3,10 +3,12 @@
 
 #include "math/vec3.h"
 
-struct Material {
+typedef struct s_material {
 	float metallic;
 	float roughness;
-};
+	vec3 albedo;
+	vec3 emit;
+} t_material;
 
 #endif
 

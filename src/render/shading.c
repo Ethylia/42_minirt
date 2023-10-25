@@ -17,17 +17,17 @@ static uint randuint()
 	return (intrand >> 22) ^ intrand;
 }
 
-static float normalrand()
+static float normalrand(float stddeviation)
 {
 	float theta = 2.0f * M_PI * (randuint() / (float)UINT_MAX); 
 	float rho = sqrtf(-2.0f * logf(randuint() / (float)UINT_MAX));
-	return rho * cosf(theta);
+	return stddeviation * rho * cosf(theta);
 }
 
 static vec3	randnorm(const vec3 raydir, const vec3 normal)
 {
 	// vec3 specdir = vec3reflect(raydir, normal);
-	vec3 randvec = (vec3){{{normalrand(), normalrand(), normalrand()}}};
+	vec3 randvec = (vec3){{{normalrand(1.0f), normalrand(1.0f), normalrand(1.0f)}}};
 	return vec3norm(vec3add(randvec, normal));
 }
 
@@ -52,20 +52,20 @@ vec3 shade(t_obj* obj, vec3 hit, const t_scene* s, vec3 ray)
 	t_hit h = {hit, obj};
 
 	vec3 color = {{{1.0f, 1.0f, 1.0f}}};
-	vec3 l = obj->emit;
+	vec3 l = obj->mat->emit;
 	for(size_t i = 1; i < s->maxdepth; ++i)
 	{
-		color = vec3mult(color, h.obj->color);
+		color = vec3mult(color, h.obj->mat->albedo);
 		const vec3 norm = getnormal(h.obj, h.pos);
 		ray = randnorm(ray, norm);
-		hit = vec3add(h.pos, vec3scale(norm, -0.0001f));
+		hit = vec3add(h.pos, vec3scale(norm, 0.0001f));
 		h = raycast((t_ray){hit, ray}, s);
 		if(!h.obj)
 		{ // sky light
 			l = vec3add(l, vec3mult(s->a_light.color, color));
 			break;
 		}
-		l = vec3add(l, vec3mult(h.obj->emit, color));
+		l = vec3add(l, vec3mult(h.obj->mat->emit, color));
 	}
 
 	return l;

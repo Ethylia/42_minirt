@@ -3,6 +3,7 @@
 
 #include "def.h"
 #include "math/mat3.h"
+#include "material.h"
 
 typedef struct s_a_light
 {
@@ -19,33 +20,21 @@ typedef struct s_camera
 	float focaldist;
 } t_camera;
 
-typedef struct s_light
-{
-	vec3 pos;
-	vec3 color;
-} t_light;
-
 typedef struct s_sphere
 {
 	vec3 pos;
-	vec3 color;
-	vec3 emit;
 	float rad;
 } t_sphere;
 
 typedef struct s_plane
 {
 	vec3 pos;
-	vec3 color;
-	vec3 emit;
 	vec3 ori;
 } t_plane;
 
 typedef struct s_cylinder
 {
 	vec3 pos;
-	vec3 color;
-	vec3 emit;
 	vec3 axis;
 	float rad;
 	float height;
@@ -64,17 +53,13 @@ typedef enum e_type
 typedef struct s_obj
 {
 	t_type type;
+	t_material* mat;
 	union
 	{
 		t_cylinder cylinder;
 		t_plane plane;
 		t_sphere sphere;
-		struct
-		{
-			vec3 pos;
-			vec3 color;
-			vec3 emit;
-		};
+		vec3 pos;
 	};
 } t_obj;
 
