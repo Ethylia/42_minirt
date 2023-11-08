@@ -3,9 +3,10 @@
 #include <math.h>
 #include "util/util.h"
 #include "math/mat3.h"
-#include "math/vec3.h"
 #include "obj/scene.h"
 #include "parseobj.h"
+
+#define MAX_MATERIALS 64
 
 int	parseambient(const char* line, t_scene* scene)
 {
@@ -88,20 +89,86 @@ int	parsecamera(const char* line, t_scene* scene)
 
 int parsematerial(const char* line, t_scene* scene)
 {
-	t_material* mat = sceneaddmat(scene);
-	if(!mat)
-		return 4;
+	t_material mat = {0};
 
 	int r = 0;
-	if((r = parsedouble(&line, &mat->metallic)) ||
-		(r = parsedouble(&line, &mat->roughness)) ||
-		(r = parsecolor(&line, mat->albedo.e)) ||
-		(r = parsecolor(&line, mat->emit.e)))
+	uint id = 0;
+	if((r = parseuint(&line, &id)) ||
+		(r = parsedouble(&line, &mat.metallic)) ||
+		(r = parsedouble(&line, &mat.roughness)) ||
+		(r = parsecolor(&line, mat.albedo.e)) ||
+		(r = parsecolor(&line, mat.emit.e)))
 		return r;
 
-	if(mat->metallic < 0.0f || mat->metallic > 1.0f ||
-		mat->roughness < 0.0f || mat->roughness > 1.0f)
+	if(!parseuint(&line, &mat.type))
+	{
+		if(mat.type == mat_checker)
+		{
+			if((r = parseuint(&line, &mat.checkermat)))
+				return r;
+			if(mat.checkermat >= scene->matvec.size)
+				return 2;
+		}
+		else if(mat.type == mat_image)
+		{
+			uint tex = 0;
+			if(!parseuint(&line, &tex) && tex && tex < scene->texvec.size)
+				mat.talbedo = scene->texs + tex;
+			if(!parseuint(&line, &tex) && tex && tex < scene->texvec.size)
+				mat.troughness = scene->texs + tex;
+		}
+	}
+	else
+		mat.type = mat_solid;
+
+	if(mat.metallic < 0.0f || mat.metallic > 1.0f ||
+		mat.roughness < 0.0f || mat.roughness > 1.0f ||
+		id >= MAX_MATERIALS || id == 0 || mat.type >= mat_max)
 		return 2;
+
+	mat.roughness *= mat.roughness; // square roughness
+
+	while(id >= scene->matvec.size)
+		if(!vecpush(&scene->matvec, scene->matvec.data))
+			return 4;
+
+	scene->mats[id] = mat;
+
+	line += countws(line);
+	if(*line != '\n' && *(line) != 0)
+		return 3;
+
+	return 0;
+}
+
+int parsetexture(const char* line, t_scene* scene)
+{
+	texture tex = {0};
+
+	int r = 0;
+	uint id = 0;
+	textype type = 0;
+	char* path = NULL;
+	if((r = parseuint(&line, &id)) ||
+		(r = parseuint(&line, &type)) ||
+		(r = parsestring(&line, &path)))
+	{
+		free(path);
+		return r;
+	}
+
+	if(!loadtexture(path, &tex, type))
+	{
+		free(path);
+		return 5;
+	}
+	free(path);
+
+	while(id >= scene->texvec.size)
+		if(!vecpush(&scene->texvec, scene->texvec.data))
+			return 4;
+
+	scene->texs[id] = tex;
 
 	line += countws(line);
 	if(*line != '\n' && *(line) != 0)

@@ -1,8 +1,6 @@
 #ifndef DEF_H
 #define DEF_H
 
-#include <stddef.h>
-
 typedef unsigned int uint;
 
 #define ERROR -1

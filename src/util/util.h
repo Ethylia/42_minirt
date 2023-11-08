@@ -1,7 +1,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include "def.h"
+#include <stddef.h>
 
 size_t countws(const char* str);
 

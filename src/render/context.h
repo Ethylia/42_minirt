@@ -4,9 +4,10 @@
 #include <time.h>
 
 #include "thread.h"
-
-#include "MLX42/MLX42.h"
 #include "obj/scene.h"
+
+typedef struct mlx mlx_t;
+typedef struct mlx_image mlx_image_t;
 
 typedef struct s_context
 {
@@ -25,7 +26,6 @@ typedef struct s_context
 	time_t end;
 } t_context;
 
-uint* randomstate();
 int contextnew(t_context *ctx, int width, int height);
 void contextfree(t_context *ctx);
 

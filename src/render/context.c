@@ -1,16 +1,13 @@
 #include <stdlib.h>
+
+#include "MLX42/MLX42.h"
+
 #include "render/context.h"
 #include "parse/parse.h"
 #include "render/render.h"
 #include "render/thread.h"
 
 #include "util/util.h"
-
-uint* randomstate()
-{
-	static uint state = 0;
-	return &state;
-}
 
 static void context_resize(int32_t width, int32_t height, void* param)
 {
@@ -30,17 +27,10 @@ int contextnew(t_context* ctx, int width, int height)
 	ctx->mlx = mlx_init(width, height, "miniRT", 1);
 	ctx->fb = mlx_new_image(ctx->mlx, width, height);
 	if(!ctx->mlx || !ctx->fb)
-	{
-		contextfree(ctx);
 		return 0;
-	}
 	intset((int*)ctx->fb->pixels, 0xff000000, width * height);
 	mlx_image_to_window(ctx->mlx, ctx->fb, 0, 0);
 	mlx_resize_hook(ctx->mlx, &context_resize, ctx);
-	ctx->exit = 0;
-	ctx->end = 0;
-	for(size_t i = 0; i < THREADS; ++i)
-		ctx->threaddone[i] = 0;
 	return 1;
 }
 
@@ -50,7 +40,10 @@ void contextfree(t_context* ctx)
 	if(ctx->fb)
 		mlx_delete_image(ctx->mlx, ctx->fb);
 	for(size_t i = 0; i < THREADS; ++i)
+	{
 		free(ctx->secimg[i]);
+		ctx->secimg[i] = 0;
+	}
 	if(ctx->mlx)
 		mlx_terminate(ctx->mlx);
 	ctx->fb = 0;

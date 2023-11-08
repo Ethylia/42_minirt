@@ -2,10 +2,10 @@ SRC_FILES = main.c \
             math/clamp.c \
             math/mat3.c \
             math/vec3.c \
-			parse/parse.c \
-			parse/file.c \
-			parse/objparser.c \
-			parse/sceneparser.c \
+            parse/parse.c \
+            parse/file.c \
+            parse/objparser.c \
+            parse/sceneparser.c \
             render/context.c \
             render/raycast.c \
             render/shading.c \
@@ -13,8 +13,10 @@ SRC_FILES = main.c \
             render/thread.c \
             util/mem.c \
             util/str.c \
-			util/vector.c \
-			obj/scene.c
+            util/vector.c \
+			util/rand.c \
+            obj/scene.c \
+			obj/texture.c
 
 SRC_DIR = src
 
@@ -23,20 +25,29 @@ OBJ:=$(addprefix $(OBJ_DIR)/,$(SRC_FILES:.c=.o))
 
 NAME=miniRT
 
-GLFW_DIR=/Users/eboyce-n/.brew/Cellar/glfw/3.3.8/lib
-
 all: mlx $(NAME)
 
 CC=gcc
 CFLAGS=-Wall -Wpedantic -Werror -Isrc -Imlx/include -Ofast -flto -mfpmath=sse -msse3
-LDFLAGS=-Lmlx/build -L$(GLFW_DIR) -Ofast -flto -mfpmath=sse -msse3
-LDLIBS=-lmlx42 -framework OpenGL -framework AppKit -framework IOKit -lglfw
+LDFLAGS=-Lmlx/build -Ofast -flto -mfpmath=sse -msse3
+LDLIBS=-lmlx42 -lglfw
+
+ifeq ($(shell uname),Darwin)
+# Mac OS
+CFLAGS+=-DMACOS
+LDFLAGS+=-L${HOME}/.brew/lib
+LDLIBS+=-framework OpenGL -framework AppKit -framework IOKit
+else
+# Linux
+CFLAGS+=-DLINUX
+LDLIBS+=-lGL
+endif
 
 debug: CFLAGS=-Wall -Wpedantic -Werror -Isrc -Imlx/include -g -DDEBUG
-debug: LDFLAGS=-Lmlx/build -L$(GLFW_DIR) -g
+debug: LDFLAGS+=-g
 debug: all
 
-mlx/libmlx.a:
+mlx/build/libmlx42.a:
 	cmake -S mlx -B mlx/build
 	$(MAKE) -C mlx/build -j4
 

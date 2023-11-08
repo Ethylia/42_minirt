@@ -3,10 +3,12 @@
 #include "render/context.h"
 #include "render/render.h"
 #include "util/util.h"
-#include "math/math.h"
+#include "math/clamp.h"
 
 #include <math.h>
 #include <string.h>
+
+#include "MLX42/MLX42.h"
 
 typedef struct s_rstate
 {
@@ -82,10 +84,29 @@ void transferimg(t_context* ctx, const t_region* reg)
 		for(size_t j = 0; j < reg->width; ++j)
 		{
 			vec = img + i * reg->width + j;
+			float r, g, b;
+			r = sqrtf(vec->x / id);
+			g = sqrtf(vec->y / id);
+			b = sqrtf(vec->z / id);
+			const float divider = fmaxf(fmaxf(r, g), b);
+			if(divider > 1.0f)
+			{
+				r /= divider;
+				g /= divider;
+				b /= divider;
+
+				r += (divider - 1.0f) * (1.0f - r);
+				g += (divider - 1.0f) * (1.0f - g);
+				b += (divider - 1.0f) * (1.0f - b);
+
+				r = fminf(r, 1.0f);
+				g = fminf(g, 1.0f);
+				b = fminf(b, 1.0f);
+			}
 			((int*)ctx->fb->pixels)[(reg->y + i) * ctx->width + reg->x + j]
-				= (imin((int)(sqrtf(vec->x / id) * 255.0f), 255)
-					| (imin((int)(sqrtf(vec->y / id) * 255.0f), 255) << 8)
-					| (imin((int)(sqrtf(vec->z / id) * 255.0f), 255) << 16)
+				= ((int)(r * 255.0f)
+					| (int)(g * 255.0f) << 8
+					| (int)(b * 255.0f) << 16
 					| 0xFF000000);
 		}
 	}

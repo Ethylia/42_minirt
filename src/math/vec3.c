@@ -32,13 +32,6 @@ vec3 vec3add(const vec3 v1, const vec3 v2)
 	return v;
 }
 
-int vec3color(const vec3 v)
-{
-	return (int)(fmaxf(fminf(v.x, 1.0f), 0.0f) * 255.0f) << 24
-		| (int)(fmaxf(fminf(v.y, 1.0f), 0.0f) * 255.0f) << 16
-		| (int)(fmaxf(fminf(v.z, 1.0f), 0.0f) * 255.0f) << 8 | 0xff;
-}
-
 vec3 vec3sub(const vec3 v1, const vec3 v2)
 {
 	vec3 v;

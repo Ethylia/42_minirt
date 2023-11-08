@@ -19,7 +19,6 @@ vec3 vec3scale(const vec3 v, const float s);
 vec3 vec3mult(const vec3 v1, const vec3 v2);
 vec3 vec3add(const vec3 v1, const vec3 v2);
 vec3 vec3sub(const vec3 v1, const vec3 v2);
-int vec3color(const vec3 v);
 
 float vec3length(const vec3 v);
 float vec3dot(const vec3 v1, const vec3 v2);

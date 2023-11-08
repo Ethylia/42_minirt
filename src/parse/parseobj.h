@@ -11,6 +11,7 @@
 #define ID_PLANE "pl"
 #define ID_CYLINDER "cy"
 #define ID_MATERIAL "m"
+#define ID_TEXTURE "t"
 
 int parseambient(char const* line, t_scene* scene);
 int parsesettings(char const* line, t_scene* scene);
@@ -19,10 +20,12 @@ int parsesphere(char const* line, t_scene* scene);
 int parseplane(char const* line, t_scene* scene);
 int parsecylinder(char const* line, t_scene* scene);
 int parsematerial(char const* line, t_scene* scene);
+int parsetexture(char const* line, t_scene* scene);
 
 int parsecolor(char const** str, float* v);
 int parsedouble(char const** str, float* v);
 int parsevec(char const** str, float* v);
 int parseuint(char const** str, uint* v);
+int parsestring(char const** str, char** v);
 
 #endif

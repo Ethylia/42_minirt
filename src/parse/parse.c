@@ -1,9 +1,11 @@
 #include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
 
-#include "parse.h"
 #include "util/util.h"
+#include "def.h"
 
-int	parsedouble(const char **str, float *v)
+int parsedouble(const char** str, float* v)
 {
 	*v = 0.0f;
 	*str += countws((const char*)*str);
@@ -15,13 +17,13 @@ int	parsedouble(const char **str, float *v)
 	}
 	if(!isdigit(**str) && **str != '.')
 		return 3;
-	while (isdigit(**str))
+	while(isdigit(**str))
 		*v = *v * 10.0 + (*((*str)++) - '0');
 	if(**str == '.')
 	{
 		if(!isdigit(*(++(*str))))
 			return 3;
-		while (isdigit(**str))
+		while(isdigit(**str))
 		{
 			*v = *v * 10.0 + (**str - '0');
 			sign *= 10;
@@ -33,7 +35,7 @@ int	parsedouble(const char **str, float *v)
 		**str != '\t' && **str != '\n' && **str != '\0') * 3;
 }
 
-int	parsevec(const char **str, float *v)
+int parsevec(const char** str, float* v)
 {
 	int	r;
 	if((r = parsedouble(str, v + 0)) ||
@@ -46,7 +48,7 @@ int	parsevec(const char **str, float *v)
 	return (**str != ' ' && **str != '\t' && **str != '\n' && **str != '\0') * 3;
 }
 
-int	parsecolor(const char **str, float *v)
+int parsecolor(const char** str, float* v)
 {
 	if(parsevec(str, v))
 		return 3;
@@ -60,7 +62,7 @@ int	parsecolor(const char **str, float *v)
 	return 0;
 }
 
-int	parseuint(const char **str, uint *v)
+int parseuint(const char** str, uint* v)
 {
 	*str += countws(*str);
 	*v = 0;
@@ -69,4 +71,24 @@ int	parseuint(const char **str, uint *v)
 	while(isdigit(**str))
 		*v = *v * 10 + (*((*str)++) - '0');
 	return (**str != ',' && **str != ' ' && **str != '\t' && **str != '\n' && **str != '\0') * 3;
+}
+
+int parsestring(const char** str, char** v)
+{
+	*str += countws(*str);
+	if(**str != '"')
+		return 3;
+	(*str)++;
+	size_t strsize = 0;
+	while((*str)[strsize] != '"' && (*str)[strsize] != '\0' && (*str)[strsize] != '\n')
+		strsize++;
+	if((*str)[strsize] != '"')
+		return 3;
+	*v = malloc(sizeof(char) * (strsize + 1));
+	if(!*v)
+		return 1;
+	memcpy(*v, *str, strsize);
+	(*v)[strsize] = '\0';
+	*str += strsize + 1;
+	return 0;
 }

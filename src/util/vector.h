@@ -1,4 +1,7 @@
-#include <stdlib.h>
+#ifndef VECTOR_H
+#define VECTOR_H
+
+#include <stddef.h>
 
 typedef struct s_vector {
 	void* data;
@@ -10,3 +13,5 @@ typedef struct s_vector {
 int vecinit(vector* v, size_t elemsize, size_t capacity);
 int vecpush(vector* v, void* data);
 void vecfree(vector* v);
+
+#endif

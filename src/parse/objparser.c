@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "parse/parseobj.h"
 #include "util/util.h"
 #include "math/vec3.h"
@@ -25,9 +24,9 @@ int parsesphere(const char* line, t_scene* scene)
 		if(matid >= scene->matcount)
 			return 2;
 	sphere->mat = scene->mats + matid;
-	
+
 	sphere->sphere.rad /= 2.0f;
-	
+
 	line += countws(line);
 	if(*line != '\n' && *(line) != 0)
 		return 3;

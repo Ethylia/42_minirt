@@ -1,16 +1,15 @@
 #include "render/render.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
+#include <limits.h>
 
-#include "math/vec3.h"
 #include "math/mat3.h"
 #include "render/raycast.h"
 #include "render/shading.h"
 #include "thread.h"
-
-#include <math.h>
+#include "def.h"
+#include "util/rand.h"
 
 static void blend(vec3* c1, const vec3 c2)
 {
@@ -37,8 +36,8 @@ vec3 pixelcast(t_context* ctx, const uint x, const uint y)
 		}}}, ctx->scene.camera.focaldist);
 
 	// random point on a disk
-	float rad = sqrtf(rand() / (float)RAND_MAX) * ctx->scene.camera.lensradius / ctx->scene.renderwidth;
-	float angle = rand() / (float)RAND_MAX * 2.0f * M_PI;
+	float rad = sqrtf((float)randuint() / UINT_MAX) * ctx->scene.camera.lensradius / ctx->scene.renderwidth;
+	float angle = (float)randuint() / UINT_MAX * 2.0f * M_PI;
 	vec3 posonlens =
 		(vec3){{{
 			rad * cosf(angle),
@@ -54,17 +53,8 @@ vec3 pixelcast(t_context* ctx, const uint x, const uint y)
 	t_ray ray = (t_ray){
 		vec3add(mat3mulvec3(ctx->scene.camera.rot, posonlens), ctx->scene.camera.pos), dir
 	};
-	t_hit hit = raycast(ray, &ctx->scene);
 
-	if(hit.obj)
-		return shade(hit.obj, hit.pos, &ctx->scene, dir);
-	else
-	{
-		// sky color gradient
-		vec3 skyboxpos = vec3norm(vec3scale(ray.dir, ctx->scene.camera.focaldist));
-		float ratio = 1.0f - (skyboxpos.y / 2.0f + 0.5f);
-		return (vec3){{{ratio * 0.3f, ratio * 0.5f, ratio * 1.0f}}};
-	}
+	return shade(ray, &ctx->scene);
 }
 
 void renderregion(t_context *ctx, const t_region region)
@@ -83,12 +73,14 @@ void renderregion(t_context *ctx, const t_region region)
 	}
 }
 
-void	render(t_context *ctx)
+void render(t_context *ctx)
 {
 	ctx->start = time(NULL);
 	for(size_t i = 0; i < THREADS; ++i)
 	{
 		ctx->secimg[i] = malloc(ctx->scene.regionsize * ctx->scene.regionsize * sizeof(vec3));
+		if(!ctx->secimg[i])
+			return;
 		pthread_create(&ctx->threads[i], NULL, renderthread, (void*)ctx);
 	}
 }

@@ -1,7 +1,6 @@
 #ifndef OBJ_H
 #define OBJ_H
 
-#include "def.h"
 #include "math/mat3.h"
 #include "material.h"
 

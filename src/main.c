@@ -13,6 +13,8 @@
 
 #include <math.h>
 
+#include "MLX42/MLX42.h"
+
 void rtkey(mlx_key_data_t keydata, void* param)
 {
 	t_context* const ctx = (t_context*)param;
@@ -46,14 +48,12 @@ void loop(void* param)
 
 int main(int argc, char const* argv[])
 {
-	t_context ctx;
+	t_context ctx = {0};
 
 	srand(time(NULL));
 	if(argc != 2)
 		return 1;
-	if(scenenew(&ctx.scene))
-		return 1;
-	if(loadscene(argv[1], &ctx.scene))
+	if(scenenew(&ctx.scene) || loadscene(argv[1], &ctx.scene))
 	{
 		scenefree(&ctx.scene);
 		return 1;
@@ -61,6 +61,7 @@ int main(int argc, char const* argv[])
 	if(!contextnew(&ctx, ctx.scene.renderwidth, ctx.scene.renderheight))
 	{
 		printf("Error creating context\n");
+		contextfree(&ctx);
 		return 1;
 	}
 	mlx_loop_hook(ctx.mlx, loop, &ctx);

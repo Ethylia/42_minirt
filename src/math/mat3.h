@@ -28,10 +28,8 @@ typedef struct
 		float m[9];
 	};
 } mat3;
-
-mat3 mat3rotvec(const vec3 v1);
+	
 vec3 mat3mulvec3(const mat3 m, const vec3 v);
-mat3 mat3inv(const mat3 m);
 mat3 lookvector(const vec3 axis);
 
 #endif
