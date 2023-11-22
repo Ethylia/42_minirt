@@ -116,6 +116,8 @@ int parsematerial(const char* line, t_scene* scene)
 				mat.talbedo = scene->texs + tex;
 			if(!parseuint(&line, &tex) && tex && tex < scene->texvec.size)
 				mat.troughness = scene->texs + tex;
+			if(!parseuint(&line, &tex) && tex && tex < scene->texvec.size)
+				mat.tnormal = scene->texs + tex;
 		}
 	}
 	else

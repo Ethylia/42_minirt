@@ -17,8 +17,8 @@ mat3 lookvector(const vec3 axis)
 	const vec3	newup = vec3norm(vec3cross(axis, right));
 
 	return (mat3){{{
-			{{{right.x, newup.x, axis.x}}},
-			{{{right.y, newup.y, axis.y}}},
-			{{{right.z, newup.z, axis.z}}}
+			right.x, newup.x, axis.x,
+			right.y, newup.y, axis.y,
+			right.z, newup.z, axis.z
 		}}};
 }

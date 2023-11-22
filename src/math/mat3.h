@@ -7,6 +7,7 @@ typedef struct
 {
 	union
 	{
+		float m[9];
 		struct
 		{
 			vec3 x;
@@ -25,7 +26,6 @@ typedef struct
 			float m21;
 			float m22;
 		};
-		float m[9];
 	};
 } mat3;
 	

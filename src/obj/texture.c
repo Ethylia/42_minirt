@@ -30,6 +30,15 @@ int loadtexture(const char* texfile, texture* tex, textype type)
 	if(type == tex_float)
 		for(size_t i = 0; i < tex->width * tex->height; ++i)
 			tex->dataf[i] = mlx_tex->pixels[i * mlx_tex->bytes_per_pixel] / 255.0f;
+	else if(type == tex_nmap)
+	{
+		for(size_t i = 0; i < tex->width * tex->height; ++i)
+		{
+			tex->data[i].x = mlx_tex->pixels[i * 4 + 1] / (255.0f / 2.0f) - 1.0f;
+			tex->data[i].y = (255 - mlx_tex->pixels[i * 4 + 0]) / (255.0f / 2.0f) - 1.0f;
+			tex->data[i].z = (255 - mlx_tex->pixels[i * 4 + 2]) / (255.0f / 2.0f) - 1.0f;
+		}
+	}
 	else
 	{
 		for(size_t i = 0; i < tex->width * tex->height; ++i)

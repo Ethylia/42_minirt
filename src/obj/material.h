@@ -7,7 +7,8 @@
 typedef enum e_textype
 {
 	tex_rgb = 0,
-	tex_float = 1
+	tex_float = 1,
+	tex_nmap = 2
 } textype;
 
 typedef struct s_texture
@@ -37,6 +38,7 @@ typedef struct s_material {
 	float roughness;
 	texture* talbedo;
 	texture* troughness;
+	texture* tnormal;
 	vec3 albedo;
 	vec3 emit;
 } t_material;

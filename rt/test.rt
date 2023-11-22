@@ -4,6 +4,7 @@
 # t ID TYPE FILEPATH // texture
 #	TYPE 0: rgb
 #	TYPE 1: single channel
+#	TYPE 2: normal map
 # m ID METALLIC ROUGHNESS COLOR EMISSIVE TYPE // material
 #	TYPE 0: ALBEDOTEXID ROUGHNESSTEXID // image textures
 #	TYPE 1: just a solid material
@@ -12,31 +13,32 @@
 # sp POS RADIUS MATID // sphere
 # cy POS DIR RADIUS HEIGHT MATID // cylinder
 A	0.0             255,255,255
-S	1200 1000       2048 12 32
-C 	0.1,-0.1,0.8   -0.2,0.15,-1.0        55 8 1.4
-#t	1 1 "rt/test.png"
-m   1 0 0.5         150,150,150 0,0,0    1
-m   2 0 1           20,20,20 0,0,0
-m   3 1 0.1        200,200,200 0,0,0
-m   4 0 0           0,0,0 30,40,170	     1
+S	1200 800        2048 8 32
+C 	0.1,-0.1,0.8   -0.2,0.15,-1.0        55 12 1.4
+t	1 2             "rt/testnormal.png"
+t	2 1             "rt/metalrough.png"
+m   1 0 0.2         150,150,150 0,0,0    0 0 0 1
+m   2 0 0.5         20,20,20 0,0,0       0 0 2 1
+m   3 1 0.1         200,200,200 0,0,0
+m   4 0 0           0,0,0 255,255,255    1
 m   5 0 0           0,0,0 255,255,255    1
 m   6 0 0.5         180,70,70 0,0,0      1
 m   7 0 1           100,120,150 0,0,0    2 6
-m   8 0 0           0,0,0 170,40,30      2 4
-m   9 0 0           0,0,0 30,170,30      1
+m   8 0 0           0,0,0 255,255,255    2 4
+m   9 0 0           0,0,0 255,255,255    1
 m  10 1 0.65        200,200,200 0,0,0    1
 #sp 0,-0.2,-0.1			0.4 1
 #pl 0,0.2,1.5		0,0,-1 2
 # floor
-sp	-1.0,100.25,-1.0 200 2
+pl	0,0.25,0        0,-1.0,0 2
 # ceiling
-pl	0,-1.5,0		0,1.0,0 2
+pl	0,-1.5,0        0,1.0,0 2
 # back wall
 sp	0,0,-101.0      200 2
 # right wall
 sp	100.6,2,-1.0    200 2
 # left wall
-sp	-100.6,2,-1.0	200 3
+sp	-100.6,2,-1.0   200 3
 # balls
 sp	0,-0.1,-1.0     0.5 8
 sp	-0.2,0.19,-0.5  0.3 1

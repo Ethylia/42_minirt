@@ -29,13 +29,48 @@ static vec3	getnormal(const t_obj* obj, const vec3 hit)
 	}
 }
 
+static vec3 gettangent(const t_obj* obj, const vec3 normal)
+{
+	vec3 up;
+
+	if(obj->type == e_sphere)
+	{
+		up = (vec3){{{0.0f, -1.0f, 0.0f}}};
+		if(fabsf(normal.y) > 0.99f)
+			up = (vec3){{{1.0f, 0.0f, 0.0f}}};
+		return vec3norm(vec3cross(normal, up));
+	}
+	else if(obj->type == e_plane)
+	{
+		up = (vec3){{{0.0f, -1.0f, 0.0f}}};
+		if(fabsf(normal.y) > 0.99f)
+			up = (vec3){{{0.0f, 0.0f, -1.0f}}};
+		return vec3norm(vec3cross(normal, up));
+	}
+	else
+		return vec3norm(vec3cross(normal, obj->cylinder.axis));
+}
+
+static vec3 normalmap(const t_obj* obj, const vec3 normal, const vec2 uv, const texture* map)
+{
+	const vec3 tangent = gettangent(obj, normal);
+	const vec3 bitangent = vec3norm(vec3cross(normal, tangent));
+	const mat3 tbn = (mat3){{{
+		tangent.x, bitangent.x, normal.x,
+		tangent.y, bitangent.y, normal.y,
+		tangent.z, bitangent.z, normal.z
+	}}};
+	const vec3 n = textureuv(map, uv);
+	return vec3norm(vec3add(vec3scale(vec3norm(mat3mulvec3(tbn, n)), 0.5f), normal));
+}
+
 static vec2 getuv(const t_obj* obj, const vec3 normal, const vec3 hit)
 {
 	vec2 uv;
 	if(obj->type == e_sphere)
 	{
-		uv.x = (atan2f(normal.z, normal.x)) * (obj->sphere.rad);
-		uv.y = (asinf(normal.y)) * (obj->sphere.rad);
+		uv.y = (atan2f(normal.z, normal.x)) * (obj->sphere.rad);
+		uv.x = (asinf(normal.y)) * (obj->sphere.rad);
 	}
 	else if(obj->type == e_plane)
 	{
@@ -51,13 +86,13 @@ static vec2 getuv(const t_obj* obj, const vec3 normal, const vec3 hit)
 				1.0f
 			}}});
 		const vec3 v = vec3cross(normal, up);
-		uv.x = vec3dot(up, hit) * 2.0f;
-		uv.y = vec3dot(v, hit) * 2.0f;
+		uv.x = vec3dot(up, hit);
+		uv.y = vec3dot(v, hit);
 	}
 	else // cylinder
 	{
-		uv.x = atan2f(normal.z, normal.x) * 0.25f;
-		uv.y = vec3dot(vec3sub(hit, obj->cylinder.pos), obj->cylinder.axis) / (obj->cylinder.rad) * 0.225f;
+		uv.x = vec3dot(vec3sub(hit, obj->cylinder.pos), obj->cylinder.axis) / (obj->cylinder.rad) * 0.25f;
+		uv.y = atan2f(normal.z, normal.x) * 0.225f;
 	}
 	return uv;
 }
@@ -86,7 +121,7 @@ vec3 shade(t_ray ray, const t_scene* s)
 			break;
 		}
 		const t_material* mat = h.obj->mat;
-		const vec3 norm = getnormal(h.obj, h.pos);
+		vec3 norm = getnormal(h.obj, h.pos);
 		if(mat->type == mat_checker)
 		{
 			uv = getuv(h.obj, norm, h.pos);
@@ -105,6 +140,8 @@ vec3 shade(t_ray ray, const t_scene* s)
 			if(mat->troughness)
 				r = 1.0f - textureuvf(mat->troughness, uv);
 		}
+		if(mat->tnormal)
+			norm = normalmap(h.obj, norm, uv, mat->tnormal);
 		const vec3 specular = vec3reflect(ray.dir, norm);
 		const vec3 diffuse = randnorm(norm);
 		const float specchance = (r) * (1.0f - mat->metallic);
@@ -124,7 +161,7 @@ vec3 shade(t_ray ray, const t_scene* s)
 		}
 		if(color.x + color.y + color.z < 0.001f)
 			break; // early out if color is too dark to see
-		ray.pos = vec3add(h.pos, vec3scale(norm, -0.0001f));
+		ray.pos = vec3add(h.pos, vec3scale(norm, 0.0001f));
 	}
 	return light;
 }
